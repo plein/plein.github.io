@@ -3,10 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello, World!</title>
+    <title>Popular eToro Investors</title>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const container = document.getElementById('investor-list');
+        fetch('https://www.etoro.com/discover/people')
+            .then(resp => resp.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const links = doc.querySelectorAll('a[href^="/people/"]');
+                const seen = new Set();
+                const ul = document.createElement('ul');
+                links.forEach(a => {
+                    const name = a.textContent.trim();
+                    const href = a.getAttribute('href');
+                    if (!name || !href || seen.has(href)) return;
+                    seen.add(href);
+                    const li = document.createElement('li');
+                    const link = document.createElement('a');
+                    link.href = 'https://www.etoro.com' + href;
+                    link.textContent = name;
+                    li.appendChild(link);
+                    ul.appendChild(li);
+                });
+                container.appendChild(ul);
+            })
+            .catch(err => {
+                container.textContent = 'Failed to load investor list: ' + err;
+            });
+    });
+    </script>
 </head>
 <body>
-    <h1>Hello, World!</h1>
-    <p>This is a GitHub Pages site.</p>
+    <h1>Popular eToro Investors</h1>
+    <p>The list below is fetched directly from the eToro Discover People page using client-side JavaScript.</p>
+    <div id="investor-list">
+        <!-- investor list will appear here automatically -->
+    </div>
 </body>
 </html>
