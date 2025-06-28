@@ -26,7 +26,7 @@
             if (data && Array.isArray(data.InstrumentDisplayDatas)) {
                 data.InstrumentDisplayDatas.forEach(item => {
                     if (item.InstrumentID != null) {
-                        var symbol  = (test.InstrumentTypeID == 10) ? `${test.SymbolFull}-USD` : test.SymbolFull;
+                        var symbol  = (item.InstrumentTypeID == 10) ? `${item.SymbolFull}-USD` : item.SymbolFull;
                         map[item.InstrumentID] = symbol;
                     }
                 });
