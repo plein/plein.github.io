@@ -18,3 +18,10 @@ The repository also includes a tools page `etoro.html` for working with
 portfolio data. Paste the JSON response from the eToro API and click
 **Process JSON** to view your positions in a table. You can then use the
 **Export CSV** button to download the table contents.
+
+## Styling
+
+Both pages now use [Bootstrap](https://getbootstrap.com/) and a simple color
+palette built around the primary Pine color `#234F1E`. Additional accents use a
+lighter pine `#3A6D35` and a golden highlight `#F2AE1C`. The layout should look
+cleaner on both desktop and mobile devices.
