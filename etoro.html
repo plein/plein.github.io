@@ -75,7 +75,6 @@
             const month = ('0' + (d.getMonth() + 1)).slice(-2);
             const day = ('0' + d.getDate()).slice(-2);
             const year = d.getFullYear();
-            const mmdd = `${month}/${day}/${year}`;
             const iso = `${year}-${month}-${day}`;
 
             const symbol = instrumentMap[pos.InstrumentID] || '';
@@ -84,7 +83,7 @@
                 symbol,
                 pos.Units,
                 pos.OpenRate,
-                `${mmdd} (${iso})`
+                iso
             ];
 
             values.forEach(v => {
