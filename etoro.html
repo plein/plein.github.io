@@ -62,7 +62,7 @@
 
         const table = document.createElement('table');
         const header = document.createElement('tr');
-        ['InstrumentID', 'Symbol', 'Quantity', 'Cost', 'Date'].forEach(col => {
+        ['Symbol', 'Quantity', 'Cost', 'Date'].forEach(col => {
             const th = document.createElement('th');
             th.textContent = col;
             header.appendChild(th);
@@ -82,7 +82,6 @@
 
             const symbol = instrumentMap[pos.InstrumentID] || '';
             const values = [
-                pos.InstrumentID,
                 symbol,
                 pos.Units,
                 pos.OpenRate,
