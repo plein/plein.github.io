@@ -12,6 +12,7 @@
     <h2>Import Portfolio JSON</h2>
     <textarea id="json-input" rows="10" cols="80" placeholder="Paste eToro API response here"></textarea><br>
     <button id="process-btn">Process JSON</button>
+    <button id="export-btn" disabled>Export CSV</button>
 
     <div id="result"></div>
 
@@ -95,6 +96,34 @@
         });
 
         resultDiv.appendChild(table);
+        const exportBtn = document.getElementById('export-btn');
+        exportBtn.disabled = false;
+        exportBtn.onclick = function () {
+            const rows = table.querySelectorAll('tr');
+            const lines = [];
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('th, td');
+                const vals = Array.from(cells).map(cell => {
+                    let text = cell.textContent.trim();
+                    if (/["]|,|\n/.test(text)) {
+                        text = '"' + text.replace(/"/g, '""') + '"';
+                    }
+                    return text;
+                });
+                lines.push(vals.join(','));
+            });
+            const csv = lines.join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'positions.csv';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
     });
     </script>
 </body>
