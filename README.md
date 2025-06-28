@@ -26,6 +26,18 @@ portfolio data. Paste the JSON response from the eToro API and click
 **Process JSON** to view your positions in a table. You can then use the
 **Export CSV** button to download the table contents.
 
+### Getting the Portfolio JSON
+
+1. Log in to eToro and open <https://www.etoro.com/portfolio/overview>.
+2. Press <kbd>F12</kbd> (or `Ctrl+Shift+I`) to open the Chrome Developer
+   Tools and select the **Network** tab.
+3. Refresh the page and look for a request to
+   `https://www.etoro.com/api/logindata/v1.1/logindata`.
+4. Click that entry and switch to the **Response** panel to see the JSON.
+5. Copy the JSON response and paste it into the text area on `etoro.html`.
+   The tools page is pre-filled with a sanitized example so you can see the
+   expected format before pasting your own data.
+
 ## Styling
 
 Both pages now use [Bootstrap](https://getbootstrap.com/) and a simple color
