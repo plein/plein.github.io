@@ -69,6 +69,9 @@
         });
         table.appendChild(header);
 
+        // Sort positions by total cost (OpenRate * Units) descending
+        positions.sort((a, b) => (b.OpenRate * b.Units) - (a.OpenRate * a.Units));
+
         positions.forEach(pos => {
             const tr = document.createElement('tr');
             const d = new Date(pos.OpenDateTime);
