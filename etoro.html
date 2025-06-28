@@ -58,6 +58,7 @@
                         const symbol = (item.InstrumentTypeID == 10)
                             ? `${item.SymbolFull}-USD`
                             : item.SymbolFull;
+
                         map[item.InstrumentID] = symbol;
                     }
                 });
