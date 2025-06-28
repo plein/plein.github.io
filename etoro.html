@@ -34,6 +34,9 @@
     <div class="container py-4">
         <h1 class="text-center mb-3">eToro Tools</h1>
         <p>Paste your eToro API JSON below and click <strong>Process JSON</strong> to generate a table of positions.</p>
+        <p class="small">To obtain the JSON, open <a href="https://www.etoro.com/portfolio/overview">your portfolio overview</a>,
+        then check the Developer Tools network tab for a request to
+        <code>https://www.etoro.com/api/logindata/v1.1/logindata</code> and copy the response body.</p>
 
         <h2>Import Portfolio JSON</h2>
         <textarea id="json-input" class="form-control mb-2" rows="10" placeholder="Paste eToro API response here"></textarea>
@@ -48,6 +51,96 @@
     </div>
 
     <script>
+    // Example portfolio JSON shown by default in the textarea
+    const exampleJson = {
+        "AggregatedResult": {
+            "ResponseSummary": {
+                "StatusCode": 200,
+                "IsSuccess": true,
+                "ErrorMessage": null,
+                "ErrorInCall": null,
+                "ApplicationName": "ReToro",
+                "ApplicationVersion": "v651.784.1",
+                "Cid": 1,
+                "AccountType": "Real",
+                "IsInMaintenance": false,
+                "MaintenanceRedirectUrl": null,
+                "ClientRatesRefreshIntervalInSeconds": 900
+            },
+            "ApiResponses": {
+                "PrivatePortfolio": {
+                    "Content": {
+                        "ClientPortfolio": {
+                            "Positions": [
+                                {
+                                    "PositionID": 111111,
+                                    "CID": 222222,
+                                    "OpenDateTime": "2025-06-26T16:01:13.8Z",
+                                    "OpenRate": 173.57,
+                                    "InstrumentID": 1002,
+                                    "IsBuy": true,
+                                    "TakeProfitRate": 1908.94,
+                                    "StopLossRate": 0.0001,
+                                    "MirrorID": 0,
+                                    "ParentPositionID": 0,
+                                    "Amount": 1000.0,
+                                    "Leverage": 1,
+                                    "OrderID": 1,
+                                    "OrderType": 17,
+                                    "Units": 1,
+                                    "TotalFees": 0.0,
+                                    "InitialAmountInDollars": 1000.0,
+                                    "IsTslEnabled": false,
+                                    "StopLossVersion": 1,
+                                    "IsSettled": true,
+                                    "RedeemStatusID": 0,
+                                    "InitialUnits": 1,
+                                    "IsPartiallyAltered": false,
+                                    "UnitsBaseValueDollars": 2000.0,
+                                    "IsDiscounted": true,
+                                    "OpenPositionActionType": 0,
+                                    "SettlementTypeID": 1,
+                                    "IsDetached": false,
+                                    "OpenConversionRate": 1.0,
+                                    "PnlVersion": 1,
+                                    "TotalExternalFees": 0.0,
+                                    "TotalExternalTaxes": 0.0,
+                                    "IsNoTakeProfit": false,
+                                    "IsNoStopLoss": true,
+                                    "LotCount": 11.522728
+                                }
+                            ],
+                            "Mirrors": [],
+                            "Credit": 0.0,
+                            "Orders": [],
+                            "StockOrders": [],
+                            "EntryOrders": [],
+                            "ExitOrders": [],
+                            "OrdersForOpen": [],
+                            "OrdersForClose": [],
+                            "OrdersForCloseMultiple": [],
+                            "BonusCredit": 0.0
+                        }
+                    },
+                    "StatusCode": 200,
+                    "ErrorMessage": null
+                },
+                "CurrentUserData": {},
+                "CustomerRestrictions": {},
+                "MirrorsUserData": {}
+            }
+        },
+        "Configuration": {
+            "Push": {
+                "RealUrl": "https://push-lightstreamer.cloud.etoro.com/",
+                "DemoUrl": "https://push-demo-lightstreamer.cloud.etoro.com/"
+            }
+        }
+    };
+
+    document.getElementById('json-input').value =
+        JSON.stringify(exampleJson, null, 2);
+
     const instrumentMapPromise = fetch('etoro/instruments.json')
         .then(resp => resp.json())
         .then(data => {
