@@ -18,7 +18,26 @@
     <p><a href="index.html">Back to Investor List</a></p>
 
     <script>
-    document.getElementById('process-btn').addEventListener('click', function () {
+    const instrumentMapPromise = fetch('etoro/instruments.json')
+        .then(resp => resp.json())
+        .then(data => {
+            const map = {};
+            if (data && Array.isArray(data.InstrumentDisplayDatas)) {
+                data.InstrumentDisplayDatas.forEach(item => {
+                    if (item.InstrumentID != null) {
+                        map[item.InstrumentID] = item.SymbolFull;
+                    }
+                });
+            }
+            return map;
+        })
+        .catch(err => {
+            console.error('Failed to load instruments:', err);
+            return {};
+        });
+
+    document.getElementById('process-btn').addEventListener('click', async function () {
+        const instrumentMap = await instrumentMapPromise;
         const input = document.getElementById('json-input').value;
         let data;
         try {
@@ -42,7 +61,7 @@
 
         const table = document.createElement('table');
         const header = document.createElement('tr');
-        ['InstrumentID', 'Quantity', 'Cost', 'Date'].forEach(col => {
+        ['InstrumentID', 'Symbol', 'Quantity', 'Cost', 'Date'].forEach(col => {
             const th = document.createElement('th');
             th.textContent = col;
             header.appendChild(th);
@@ -58,8 +77,10 @@
             const mmdd = `${month}/${day}/${year}`;
             const iso = `${year}-${month}-${day}`;
 
+            const symbol = instrumentMap[pos.InstrumentID] || '';
             const values = [
                 pos.InstrumentID,
+                symbol,
                 pos.Units,
                 pos.Amount,
                 `${mmdd} (${iso})`
