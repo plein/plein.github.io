@@ -6,7 +6,9 @@
     <title>Popular eToro Investors</title>
     <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const container = document.getElementById('investor-list');
+        const investorContainer = document.getElementById('investor-list');
+        const rankingsContainer = document.getElementById('rankings');
+
         fetch('https://www.etoro.com/discover/people')
             .then(resp => resp.text())
             .then(html => {
@@ -27,10 +29,19 @@
                     li.appendChild(link);
                     ul.appendChild(li);
                 });
-                container.appendChild(ul);
+                investorContainer.appendChild(ul);
             })
             .catch(err => {
-                container.textContent = 'Failed to load investor list: ' + err;
+                investorContainer.textContent = 'Failed to load investor list: ' + err;
+            });
+
+        fetch('https://www.etoro.com/sapi/rankings/cid/7659559/rankings/?Period=LastTwoYears')
+            .then(resp => resp.json())
+            .then(data => {
+                rankingsContainer.textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(err => {
+                rankingsContainer.textContent = 'Failed to load rankings: ' + err;
             });
     });
     </script>
@@ -41,5 +52,9 @@
     <div id="investor-list">
         <!-- investor list will appear here automatically -->
     </div>
+    <h2>Ranking Results</h2>
+    <pre id="rankings">
+        <!-- ranking data will appear here automatically -->
+    </pre>
 </body>
 </html>
