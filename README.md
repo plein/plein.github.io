@@ -11,3 +11,8 @@ Because this fetch happens from the browser, cross‑origin restrictions may pre
 ## Note
 
 An internet connection is required for the investor list to load. If the request to eToro is blocked, the page will display an error message.
+
+## eToro Tools
+
+The repository also includes a placeholder page `etoro.html` for future tools.
+Planned features include importing a profile from JSON and exporting data to CSV.
