@@ -26,7 +26,8 @@
             if (data && Array.isArray(data.InstrumentDisplayDatas)) {
                 data.InstrumentDisplayDatas.forEach(item => {
                     if (item.InstrumentID != null) {
-                        map[item.InstrumentID] = item.SymbolFull;
+                        var symbol  = (test.InstrumentTypeID == 10) ? `${test.SymbolFull}-USD` : test.SymbolFull;
+                        map[item.InstrumentID] = symbol;
                     }
                 });
             }
@@ -62,7 +63,7 @@
 
         const table = document.createElement('table');
         const header = document.createElement('tr');
-        ['Symbol', 'Quantity', 'Cost', 'Date'].forEach(col => {
+        ['Symbol', 'Quantity', 'Cost', 'Date', 'Warnings'].forEach(col => {
             const th = document.createElement('th');
             th.textContent = col;
             header.appendChild(th);
@@ -79,6 +80,13 @@
             const day = ('0' + d.getDate()).slice(-2);
             const year = d.getFullYear();
             const iso = `${year}-${month}-${day}`;
+            var warnings = '';
+            if (!pos.IsBuy) {
+                warnings += 'SHORT Position\n';
+            }
+            if (pos.OpenConversionRate != 1) {
+                warnings += 'Non US stock position. Might fail to import into some systems';
+            }
 
             const symbol = instrumentMap[pos.InstrumentID] || '';
             const values = [
@@ -96,36 +104,41 @@
             table.appendChild(tr);
         });
 
-        resultDiv.appendChild(table);
         const exportBtn = document.getElementById('export-btn');
         exportBtn.disabled = false;
         exportBtn.onclick = function () {
-            const rows = table.querySelectorAll('tr');
-            const lines = [];
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('th, td');
-                const vals = Array.from(cells).map(cell => {
-                    let text = cell.textContent.trim();
-                    if (/["]|,|\n/.test(text)) {
-                        text = '"' + text.replace(/"/g, '""') + '"';
-                    }
-                    return text;
-                });
-                lines.push(vals.join(','));
+        // only these column-indices will be exported:
+        const includeCols = [0,1,2,3]; 
+
+        const rows = table.querySelectorAll('tr');
+        const lines = [];
+        rows.forEach(row => {
+            const cells = Array.from(row.querySelectorAll('th, td'));
+            // keep only the ones in includeCols:
+            const filtered = cells
+            .filter((_, idx) => includeCols.includes(idx))
+            .map(cell => {
+                let text = cell.textContent.trim();
+                if (/["]|,|\n/.test(text)) {
+                text = '"' + text.replace(/"/g, '""') + '"';
+                }
+                return text;
             });
-            const csv = lines.join('\n');
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'positions.csv';
-            a.style.display = 'none';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            lines.push(filtered.join(','));
+        });
+
+        const csv = lines.join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'positions.csv';
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
         };
-    });
     </script>
 </body>
 </html>
