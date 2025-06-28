@@ -12,6 +12,13 @@ Because this fetch happens from the browser, cross‑origin restrictions may pre
 
 An internet connection is required for the investor list to load. If the request to eToro is blocked, the page will display an error message.
 
+## Files
+
+Each page now loads its own JavaScript and CSS:
+
+- `index.html` uses `index.js` and `index.css`
+- `etoro.html` uses `etoro.js` and `etoro.css`
+
 ## eToro Tools
 
 The repository also includes a tools page `etoro.html` for working with
