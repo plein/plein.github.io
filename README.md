@@ -14,5 +14,7 @@ An internet connection is required for the investor list to load. If the request
 
 ## eToro Tools
 
-The repository also includes a placeholder page `etoro.html` for future tools.
-Planned features include importing a profile from JSON and exporting data to CSV.
+The repository also includes a tools page `etoro.html` for working with
+portfolio data. Paste the JSON response from the eToro API and click
+**Process JSON** to view your positions in a table. You can then use the
+**Export CSV** button to download the table contents.
