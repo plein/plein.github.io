@@ -2,6 +2,16 @@
     const form = document.getElementById('habit-form');
     const input = document.getElementById('habit-input');
     const list = document.getElementById('habit-list');
+    const toggleEdit = document.getElementById('toggle-edit');
+
+    let editMode = false;
+
+    function updateEditVisibility() {
+        toggleEdit.textContent = editMode ? 'Done' : 'Edit Mode';
+        document.querySelectorAll('.edit-only').forEach(el => {
+            el.classList.toggle('d-none', !editMode);
+        });
+    }
 
     let habits = [];
 
@@ -50,12 +60,12 @@
         btnGroup.appendChild(trackBtn);
 
         const goalBtn = document.createElement('button');
-        goalBtn.className = 'btn btn-sm btn-outline-primary me-2 set-goal';
+        goalBtn.className = 'btn btn-sm btn-outline-primary me-2 set-goal edit-only';
         goalBtn.textContent = 'Goal';
         btnGroup.appendChild(goalBtn);
 
         const removeBtn = document.createElement('button');
-        removeBtn.className = 'btn btn-sm btn-danger remove-habit';
+        removeBtn.className = 'btn btn-sm btn-danger remove-habit edit-only';
         removeBtn.textContent = 'Remove';
         btnGroup.appendChild(removeBtn);
 
@@ -114,6 +124,7 @@
 
         list.appendChild(li);
         updateHabitDisplay(li, habit);
+        updateEditVisibility();
     }
 
     function formatHistoryDate(ts) {
@@ -182,13 +193,13 @@
             const btnWrap = document.createElement('div');
 
             const editBtn = document.createElement('button');
-            editBtn.className = 'btn btn-sm btn-outline-secondary me-1 edit-entry';
+            editBtn.className = 'btn btn-sm btn-outline-secondary me-1 edit-entry edit-only';
             editBtn.textContent = 'Edit';
             editBtn.dataset.ts = ts;
             btnWrap.appendChild(editBtn);
 
             const removeBtn = document.createElement('button');
-            removeBtn.className = 'btn btn-sm btn-outline-danger remove-entry';
+            removeBtn.className = 'btn btn-sm btn-outline-danger remove-entry edit-only';
             removeBtn.textContent = 'Remove';
             removeBtn.dataset.ts = ts;
             btnWrap.appendChild(removeBtn);
@@ -203,6 +214,7 @@
         } else {
             loadMoreBtn.style.display = 'none';
         }
+        updateEditVisibility();
     }
 
     function loadHabits() {
@@ -314,5 +326,11 @@
         }
     });
 
+    toggleEdit.addEventListener('click', function() {
+        editMode = !editMode;
+        updateEditVisibility();
+    });
+
     loadHabits();
+    updateEditVisibility();
 })();
