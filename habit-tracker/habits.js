@@ -11,6 +11,7 @@
                 return { name: h, history: [] };
             }
             if (!h.history) h.history = [];
+            if (!h.goal) h.goal = null;
             return h;
         });
     }
@@ -48,6 +49,11 @@
         trackBtn.textContent = 'Track';
         btnGroup.appendChild(trackBtn);
 
+        const goalBtn = document.createElement('button');
+        goalBtn.className = 'btn btn-sm btn-outline-primary me-2 set-goal';
+        goalBtn.textContent = 'Goal';
+        btnGroup.appendChild(goalBtn);
+
         const removeBtn = document.createElement('button');
         removeBtn.className = 'btn btn-sm btn-danger remove-habit';
         removeBtn.textContent = 'Remove';
@@ -59,6 +65,14 @@
         const count = document.createElement('small');
         count.className = 'text-muted habit-count';
         li.appendChild(count);
+
+        const goalInfo = document.createElement('div');
+        goalInfo.className = 'text-muted small habit-goal';
+        li.appendChild(goalInfo);
+
+        const progressInfo = document.createElement('div');
+        progressInfo.className = 'text-muted small habit-progress';
+        li.appendChild(progressInfo);
 
         const historyList = document.createElement('ul');
         historyList.className = 'history-list list-group mt-2';
@@ -85,9 +99,44 @@
         return `${month} ${day}, ${time}${withYear ? ' ' + d.getFullYear() : ''}`;
     }
 
+    function countInPeriod(habit) {
+        if (!habit.goal) return 0;
+        const now = new Date();
+        let start;
+        if (habit.goal.period === 'day') {
+            start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        } else {
+            start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+        }
+        return habit.history.filter(ts => new Date(ts) >= start).length;
+    }
+
+    function goalMet(habit, count) {
+        if (!habit.goal) return false;
+        const cmp = habit.goal.comparator;
+        const t = habit.goal.times;
+        if (cmp === '<') return count < t;
+        if (cmp === '=') return count === t;
+        return count > t;
+    }
+
+    function goalText(habit) {
+        if (!habit.goal) return 'No goal set';
+        const map = { '<': 'Less than', '>': 'More than', '=': 'Exactly' };
+        return `Goal: ${map[habit.goal.comparator]} ${habit.goal.times} per ${habit.goal.period}`;
+    }
+
     function updateHabitDisplay(li, habit) {
         const countEl = li.querySelector('.habit-count');
         countEl.textContent = `Tracked ${habit.history.length} times`;
+        li.querySelector('.habit-goal').textContent = goalText(habit);
+        if (habit.goal) {
+            const c = countInPeriod(habit);
+            const met = goalMet(habit, c);
+            li.querySelector('.habit-progress').textContent = `This ${habit.goal.period}: ${c} (${met ? 'goal met' : 'goal not met'})`;
+        } else {
+            li.querySelector('.habit-progress').textContent = '';
+        }
 
         const limit = parseInt(li.dataset.limit || '10', 10);
         const historyList = li.querySelector('.history-list');
@@ -197,6 +246,17 @@
         } else if (e.target.classList.contains('track-habit')) {
             const now = new Date();
             habit.history.push(now.toISOString());
+            saveHabits();
+            updateHabitDisplay(habitLi, habit);
+        } else if (e.target.classList.contains('set-goal')) {
+            const period = prompt('Goal period (day/week):', habit.goal ? habit.goal.period : 'day');
+            if (!period || (period !== 'day' && period !== 'week')) return;
+            const cmp = prompt('Comparison (< for less, = for equal, > for more):', habit.goal ? habit.goal.comparator : '<');
+            if (!cmp || !['<','>','='].includes(cmp)) return;
+            const timesInput = prompt('Times:', habit.goal ? habit.goal.times : '1');
+            const t = parseInt(timesInput, 10);
+            if (isNaN(t) || t <= 0) return;
+            habit.goal = { period, comparator: cmp, times: t };
             saveHabits();
             updateHabitDisplay(habitLi, habit);
         } else if (e.target.classList.contains('load-more')) {
