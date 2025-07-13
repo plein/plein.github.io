@@ -87,7 +87,7 @@ const exampleJson = {
 document.getElementById('json-input').value =
     JSON.stringify(exampleJson, null, 2);
 
-const instrumentMapPromise = fetch('etoro/instruments.json')
+const instrumentMapPromise = fetch('./instruments.json')
     .then(resp => resp.json())
     .then(data => {
         const map = {};
