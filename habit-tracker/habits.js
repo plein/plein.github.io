@@ -19,6 +19,16 @@
         localStorage.setItem('habits', JSON.stringify(habits));
     }
 
+    function localInputValue(date) {
+        const pad = n => String(n).padStart(2, '0');
+        const y = date.getFullYear();
+        const m = pad(date.getMonth() + 1);
+        const d = pad(date.getDate());
+        const h = pad(date.getHours());
+        const min = pad(date.getMinutes());
+        return `${y}-${m}-${d}T${h}:${min}`;
+    }
+
     function renderHabit(habit) {
         const li = document.createElement('li');
         li.className = 'list-group-item';
@@ -165,7 +175,7 @@
             const oldTs = e.target.dataset.ts;
             const idx = habit.history.indexOf(oldTs);
             if (idx !== -1) {
-                const defaultVal = new Date(oldTs).toISOString().slice(0,16);
+                const defaultVal = localInputValue(new Date(oldTs));
                 const inputVal = prompt('Enter new date/time (YYYY-MM-DDTHH:MM):', defaultVal);
                 if (inputVal === null) return;
                 const parsed = new Date(inputVal);
