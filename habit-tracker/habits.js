@@ -92,12 +92,21 @@
             span.textContent = formatHistoryDate(ts);
             item.appendChild(span);
 
+            const btnWrap = document.createElement('div');
+
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn btn-sm btn-outline-secondary me-1 edit-entry';
+            editBtn.textContent = 'Edit';
+            editBtn.dataset.ts = ts;
+            btnWrap.appendChild(editBtn);
+
             const removeBtn = document.createElement('button');
             removeBtn.className = 'btn btn-sm btn-outline-danger remove-entry';
             removeBtn.textContent = 'Remove';
             removeBtn.dataset.ts = ts;
-            item.appendChild(removeBtn);
+            btnWrap.appendChild(removeBtn);
 
+            item.appendChild(btnWrap);
             historyList.appendChild(item);
         });
 
@@ -152,6 +161,22 @@
                 saveHabits();
                 updateHabitDisplay(habitLi, habit);
             }
+        } else if (e.target.classList.contains('edit-entry')) {
+            const oldTs = e.target.dataset.ts;
+            const idx = habit.history.indexOf(oldTs);
+            if (idx !== -1) {
+                const defaultVal = new Date(oldTs).toISOString().slice(0,16);
+                const inputVal = prompt('Enter new date/time (YYYY-MM-DDTHH:MM):', defaultVal);
+                if (inputVal === null) return;
+                const parsed = new Date(inputVal);
+                if (isNaN(parsed)) {
+                    alert('Invalid date/time');
+                    return;
+                }
+                habit.history[idx] = parsed.toISOString();
+                saveHabits();
+                updateHabitDisplay(habitLi, habit);
+            }
         } else if (e.target.classList.contains('remove-habit')) {
             const confirmDelete = confirm(`Delete habit "${name}"?`);
             if (confirmDelete) {
@@ -160,21 +185,8 @@
                 saveHabits();
             }
         } else if (e.target.classList.contains('track-habit')) {
-            const defaultVal = new Date().toISOString().slice(0,16);
-            const inputVal = prompt('Enter date/time (YYYY-MM-DDTHH:MM) or leave blank for now:', defaultVal);
-            if (inputVal === null) return;
-            let date;
-            if (inputVal.trim() === '') {
-                date = new Date();
-            } else {
-                const parsed = new Date(inputVal);
-                if (isNaN(parsed)) {
-                    alert('Invalid date/time');
-                    return;
-                }
-                date = parsed;
-            }
-            habit.history.push(date.toISOString());
+            const now = new Date();
+            habit.history.push(now.toISOString());
             saveHabits();
             updateHabitDisplay(habitLi, habit);
         } else if (e.target.classList.contains('load-more')) {
