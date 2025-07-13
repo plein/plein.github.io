@@ -74,6 +74,34 @@
         progressInfo.className = 'text-muted small habit-progress';
         li.appendChild(progressInfo);
 
+        const editor = document.createElement('div');
+        editor.className = 'goal-editor border rounded p-2 mt-2 d-none';
+        editor.innerHTML = `
+            <div class="mb-2">
+                <label class="form-label mb-1">Period</label>
+                <select class="form-select form-select-sm goal-period">
+                    <option value="day">Day</option>
+                    <option value="week">Week</option>
+                </select>
+            </div>
+            <div class="mb-2">
+                <label class="form-label mb-1">Comparison</label>
+                <select class="form-select form-select-sm goal-comparator">
+                    <option value="<">Less than</option>
+                    <option value="=">Exactly</option>
+                    <option value=">">More than</option>
+                </select>
+            </div>
+            <div class="mb-2">
+                <label class="form-label mb-1">Times</label>
+                <input type="number" min="1" value="1" class="form-control form-control-sm goal-times">
+            </div>
+            <div class="mt-2">
+                <button class="btn btn-sm btn-primary me-2 save-goal">Save</button>
+                <button class="btn btn-sm btn-secondary cancel-goal">Cancel</button>
+            </div>`;
+        li.appendChild(editor);
+
         const historyList = document.createElement('ul');
         historyList.className = 'history-list list-group mt-2';
         li.appendChild(historyList);
@@ -249,16 +277,27 @@
             saveHabits();
             updateHabitDisplay(habitLi, habit);
         } else if (e.target.classList.contains('set-goal')) {
-            const period = prompt('Goal period (day/week):', habit.goal ? habit.goal.period : 'day');
-            if (!period || (period !== 'day' && period !== 'week')) return;
-            const cmp = prompt('Comparison (< for less, = for equal, > for more):', habit.goal ? habit.goal.comparator : '<');
-            if (!cmp || !['<','>','='].includes(cmp)) return;
-            const timesInput = prompt('Times:', habit.goal ? habit.goal.times : '1');
-            const t = parseInt(timesInput, 10);
-            if (isNaN(t) || t <= 0) return;
+            const editor = habitLi.querySelector('.goal-editor');
+            editor.classList.toggle('d-none');
+            editor.querySelector('.goal-period').value = habit.goal ? habit.goal.period : 'day';
+            editor.querySelector('.goal-comparator').value = habit.goal ? habit.goal.comparator : '<';
+            editor.querySelector('.goal-times').value = habit.goal ? habit.goal.times : 1;
+        } else if (e.target.classList.contains('save-goal')) {
+            const editor = e.target.closest('.goal-editor');
+            const period = editor.querySelector('.goal-period').value;
+            const cmp = editor.querySelector('.goal-comparator').value;
+            const t = parseInt(editor.querySelector('.goal-times').value, 10);
+            if (isNaN(t) || t <= 0) {
+                alert('Invalid times');
+                return;
+            }
             habit.goal = { period, comparator: cmp, times: t };
             saveHabits();
             updateHabitDisplay(habitLi, habit);
+            editor.classList.add('d-none');
+        } else if (e.target.classList.contains('cancel-goal')) {
+            const editor = e.target.closest('.goal-editor');
+            editor.classList.add('d-none');
         } else if (e.target.classList.contains('load-more')) {
             const current = parseInt(habitLi.dataset.limit || '10', 10);
             habitLi.dataset.limit = (current + 10).toString();
