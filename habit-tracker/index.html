@@ -3,26 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Popular eToro Investors</title>
+    <title>Habit Tracker</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="../index.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="habits.js"></script>
+    <script defer src="habits.js"></script>
 </head>
 <body class="bg-light">
     <div class="container py-4">
         <h1 class="text-center mb-3">Habit Tracker</h1>
-        <p>Track your habits and see how they're doing.</p>
-        <p>This is a simple tool that allows you to track your habits and see how they're doing.</p>
-        <p>The data is stored in a JSON file in the browser's local storage. You can clear the data by clicking the "Clear Data" button.</p>
-        <p>If you change your browser, the data will be lost.</p>
-        
-        <div class="container text-center">
-            <div class="row">
-              <div class="col-sm-8">
-               
-              </div>
-            </div>
+        <form id="habit-form" class="input-group mb-3">
+            <input type="text" id="habit-input" class="form-control" placeholder="New habit" required>
+            <button class="btn btn-primary" type="submit">Add Habit</button>
+        </form>
+        <ul id="habit-list" class="list-group"></ul>
     </div>
 </body>
 </html>
