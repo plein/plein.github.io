@@ -64,6 +64,17 @@
         updateHabitDisplay(li, habit);
     }
 
+    function formatHistoryDate(ts) {
+        const d = new Date(ts);
+        if (isNaN(d)) return ts;
+        const now = new Date();
+        const withYear = d.getFullYear() !== now.getFullYear();
+        const month = d.toLocaleString(undefined, { month: 'short' });
+        const day = d.getDate();
+        const time = d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false });
+        return `${month} ${day}, ${time}${withYear ? ' ' + d.getFullYear() : ''}`;
+    }
+
     function updateHabitDisplay(li, habit) {
         const countEl = li.querySelector('.habit-count');
         countEl.textContent = `Tracked ${habit.history.length} times`;
@@ -75,8 +86,18 @@
         const items = habit.history.slice(start).reverse();
         items.forEach(ts => {
             const item = document.createElement('li');
-            item.className = 'list-group-item py-1';
-            item.textContent = new Date(ts).toLocaleString();
+            item.className = 'list-group-item py-1 d-flex justify-content-between align-items-center';
+
+            const span = document.createElement('span');
+            span.textContent = formatHistoryDate(ts);
+            item.appendChild(span);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'btn btn-sm btn-outline-danger remove-entry';
+            removeBtn.textContent = 'Remove';
+            removeBtn.dataset.ts = ts;
+            item.appendChild(removeBtn);
+
             historyList.appendChild(item);
         });
 
@@ -117,17 +138,25 @@
     });
 
     list.addEventListener('click', function(e) {
-        const li = e.target.closest('li');
-        if (!li) return;
-        const name = li.dataset.name;
+        const habitLi = e.target.closest('#habit-list > li');
+        if (!habitLi) return;
+        const name = habitLi.dataset.name;
         const habit = habits.find(h => h.name === name);
         if (!habit) return;
 
-        if (e.target.classList.contains('remove-habit')) {
+        if (e.target.classList.contains('remove-entry')) {
+            const ts = e.target.dataset.ts;
+            const idx = habit.history.indexOf(ts);
+            if (idx !== -1) {
+                habit.history.splice(idx, 1);
+                saveHabits();
+                updateHabitDisplay(habitLi, habit);
+            }
+        } else if (e.target.classList.contains('remove-habit')) {
             const confirmDelete = confirm(`Delete habit "${name}"?`);
             if (confirmDelete) {
                 habits = habits.filter(h => h.name !== name);
-                li.remove();
+                habitLi.remove();
                 saveHabits();
             }
         } else if (e.target.classList.contains('track-habit')) {
@@ -147,11 +176,11 @@
             }
             habit.history.push(date.toISOString());
             saveHabits();
-            updateHabitDisplay(li, habit);
+            updateHabitDisplay(habitLi, habit);
         } else if (e.target.classList.contains('load-more')) {
-            const current = parseInt(li.dataset.limit || '10', 10);
-            li.dataset.limit = (current + 10).toString();
-            updateHabitDisplay(li, habit);
+            const current = parseInt(habitLi.dataset.limit || '10', 10);
+            habitLi.dataset.limit = (current + 10).toString();
+            updateHabitDisplay(habitLi, habit);
         }
     });
 
