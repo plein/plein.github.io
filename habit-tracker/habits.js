@@ -7,7 +7,7 @@
     let editMode = false;
 
     function updateEditVisibility() {
-        toggleEdit.textContent = editMode ? 'Done' : 'Edit Mode';
+        toggleEdit.textContent = editMode ? 'View Mode' : 'Edit Mode';
         document.querySelectorAll('.edit-only').forEach(el => {
             el.classList.toggle('d-none', !editMode);
         });
