@@ -1,34 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>eToro Tools</title>
+    <title>eToro Portfolio to CSV - Plein Random Tools</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="etoro.css">
-    <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "e0ee78feb86642bb96a5b23221016d29"}'></script><!-- End Cloudflare Web Analytics -->
+    <link rel="stylesheet" href="../index.css">
+    <!-- Cloudflare Web Analytics -->
+    <script defer src='https://static.cloudflareinsights.com/beacon.min.js'
+        data-cf-beacon='{"token": "e0ee78feb86642bb96a5b23221016d29"}'></script><!-- End Cloudflare Web Analytics -->
 </head>
+
 <body class="bg-light">
-    <div class="container py-4">
-        <h1 class="text-center mb-3">eToro Tools</h1>
-        <p>Paste your eToro API JSON below and click <strong>Process JSON</strong> to generate a table of positions.</p>
-        <p class="small">To obtain the JSON, open <a href="https://www.etoro.com/portfolio/overview">your portfolio overview</a>,
-        then check the Developer Tools network tab for a request to
-        <code>https://www.etoro.com/api/logindata/v1.1/logindata</code> and copy the response body.</p>
-
-        <h2>Import Portfolio JSON</h2>
-        <textarea id="json-input" class="form-control mb-2" rows="10" placeholder="Paste eToro API response here"></textarea>
-        <div class="mb-3">
-            <button id="process-btn" class="btn btn-primary me-2">Process JSON</button>
-            <button id="export-btn" class="btn btn-secondary" disabled>Export CSV</button>
+    <header class="site-header">
+        <div class="container">
+            <nav class="navbar">
+                <h1 class="site-title">Plein Random Tools</h1>
+                <div class="nav-links">
+                    <a href="../index.html" class="nav-link">← Home</a>
+                </div>
+            </nav>
         </div>
+    </header>
 
-        <div id="result" class="table-responsive"></div>
+    <main class="main-content">
+        <div class="container py-4">
+            <h1 class="mb-4">eToro Portfolio to CSV</h1>
+            <p>Paste your eToro API JSON below and click <strong>Process JSON</strong> to generate a table of positions.
+            </p>
+            <p class="small">To obtain the JSON, open <a href="https://www.etoro.com/portfolio/overview">your portfolio
+                    overview</a>,
+                then check the Developer Tools network tab for a request to
+                <code>https://www.etoro.com/api/logindata/v1.1/logindata</code> and copy the response body.
+            </p>
 
-        <p class="mt-4"><a href="../index.html" class="btn btn-link">Back to Home</a></p>
-    </div>
+            <h2>Import Portfolio JSON</h2>
+            <textarea id="json-input" class="form-control mb-2" rows="10"
+                placeholder="Paste eToro API response here"></textarea>
+            <div class="mb-3">
+                <button id="process-btn" class="btn btn-primary me-2">Process JSON</button>
+                <button id="export-btn" class="btn btn-secondary" disabled>Export CSV</button>
+            </div>
+
+            <div id="result" class="table-responsive"></div>
+        </div>
+    </main>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="etoro.js"></script>
-
 </body>
+
 </html>
