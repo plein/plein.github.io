@@ -4,12 +4,23 @@ export const createClocks = (level: Level, width: number, height: number): Clock
     const clocks: Clock[] = [];
     const numClocks = level.clockConfigs ? level.clockConfigs.length : (level.numClocks || 3);
 
-    const cols = Math.ceil(Math.sqrt(numClocks));
+    const isPortrait = height > width;
+
+    let cols: number;
+    if (isPortrait) {
+        // In portrait (mobile), limit to 2 columns to make clocks larger
+        cols = Math.min(numClocks, 2);
+    } else {
+        // In landscape, use standard square-ish grid
+        cols = Math.ceil(Math.sqrt(numClocks));
+    }
+
     const rows = Math.ceil(numClocks / cols);
 
     const cellWidth = width / cols;
     const cellHeight = height / rows;
-    const radius = Math.min(cellWidth, cellHeight) * 0.42; // Increased from 0.35 for better mobile visibility
+    // Use slightly larger radius multiplier (0.45) to fill more space
+    const radius = Math.min(cellWidth, cellHeight) * 0.45;
 
     for (let i = 0; i < numClocks; i++) {
         const col = i % cols;

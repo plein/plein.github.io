@@ -152,8 +152,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ level, onLevelComplete }) => {
             if (clock.successfullyStopped && isStopped) {
                 const remainingTime = clock.stoppedUntil - now;
                 // Calculate fraction relative to stopDurationMs
-                // Clamp to 1.0 so it doesn't look weird if time is stacked
-                const fraction = Math.min(1.0, Math.max(0, remainingTime / level.stopDurationMs));
+                const fraction = Math.max(0, remainingTime / level.stopDurationMs);
 
                 if (fraction > 0) {
                     ctx.beginPath();
