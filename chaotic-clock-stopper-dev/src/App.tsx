@@ -124,9 +124,11 @@ function GameContent() {
     <div className="min-h-screen bg-slate-900 text-white flex flex-col font-sans">
       {gameState === 'MENU' && (
         <div className="flex-1 flex flex-col items-center justify-center p-4">
-          <h1 className="text-4xl md:text-5xl font-bold mb-8 tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-            Chaotic Clock Stopper
-          </h1>
+          <img
+            src="/logo.png"
+            alt="Chaotic Clock Stopper"
+            className="w-full max-w-md mb-8 rounded-2xl"
+          />
           <div className="text-center space-y-6 p-8 bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 max-w-md w-full">
             <p className="text-lg text-slate-300">
               Stop all clocks at exactly 12 o'clock. <br />
