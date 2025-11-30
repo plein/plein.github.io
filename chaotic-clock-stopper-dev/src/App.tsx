@@ -133,16 +133,16 @@ function GameContent() {
               When you stop one, the others get faster! <br /><br />
               Click on the stopped clock to refreeze it.
             </p>
-            <div className="flex flex-col space-y-4">
+            <div className="flex flex-row gap-4">
               <button
                 onClick={() => startGame('NORMAL')}
-                className="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-full text-xl transition-all transform hover:scale-105 shadow-lg shadow-blue-500/30"
+                className="flex-1 px-10 py-6 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-full text-2xl transition-all transform hover:scale-105 shadow-lg shadow-blue-500/30"
               >
                 Normal Mode
               </button>
               <button
                 onClick={() => startGame('SURVIVAL')}
-                className="px-8 py-4 bg-red-600 hover:bg-red-500 text-white font-bold rounded-full text-xl transition-all transform hover:scale-105 shadow-lg shadow-red-500/30"
+                className="flex-1 px-10 py-6 bg-red-600 hover:bg-red-500 text-white font-bold rounded-full text-2xl transition-all transform hover:scale-105 shadow-lg shadow-red-500/30"
               >
                 Survival Mode
               </button>
