@@ -114,6 +114,21 @@ function GameContent() {
     setGameState('PLAYING');
   };
 
+  const handleBackToMenu = () => {
+    if (window.confirm('Are you sure you want to quit? Your progress will be lost.')) {
+      const metadata: Record<string, string> = {
+        level: String(levelIndex + 1),
+        gameMode: gameMode
+      };
+      if (gameMode === 'SURVIVAL') {
+        metadata.survivalTimeLeft = String(survivalTimeLeft);
+      }
+      client.logEvent('game_drop', undefined, metadata);
+      setLevelIndex(0);
+      setGameState('MENU');
+    }
+  };
+
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -168,15 +183,23 @@ function GameContent() {
 
       {gameState === 'PLAYING' && (
         <div className="flex-1 flex flex-col">
-          <div className="text-center py-4 relative">
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-300">
-              Level {levelIndex + 1} / {LEVELS.length}
-            </h2>
-            {gameMode === 'SURVIVAL' && (
-              <div className={`text-xl font-mono mt-1 ${survivalTimeLeft < 60 ? 'text-red-400 animate-pulse' : 'text-blue-400'}`}>
-                Time Left: {formatTime(survivalTimeLeft)}
-              </div>
-            )}
+          <div className="py-4 px-4 relative">
+            <button
+              onClick={handleBackToMenu}
+              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg transition-all text-sm"
+            >
+              ← Menu
+            </button>
+            <div className="text-center mt-2">
+              <h2 className="text-2xl md:text-3xl font-bold text-slate-300">
+                Level {levelIndex + 1} / {LEVELS.length}
+              </h2>
+              {gameMode === 'SURVIVAL' && (
+                <div className={`text-xl font-mono mt-1 ${survivalTimeLeft < 60 ? 'text-red-400 animate-pulse' : 'text-blue-400'}`}>
+                  Time Left: {formatTime(survivalTimeLeft)}
+                </div>
+              )}
+            </div>
           </div>
           <div className="flex-1">
             <GameCanvas
