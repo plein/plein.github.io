@@ -7,6 +7,7 @@ export interface Clock {
     baseSpeed: number; // original degrees per second (before increments)
     speed: number; // current degrees per second (with increments)
     stoppedUntil: number; // timestamp, 0 if running
+    successfullyStopped: boolean; // true only for successful stops, false for auto-pauses
 }
 
 export interface ClockConfig {

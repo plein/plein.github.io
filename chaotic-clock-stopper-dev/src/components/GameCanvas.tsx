@@ -2,9 +2,14 @@ import React, { useEffect, useRef } from 'react';
 import type { Clock, Level } from '../game/types';
 import { createClocks, updateClocks, checkHit } from '../game/engine';
 
+interface LevelStats {
+    timeSeconds: number;
+    clicks: number;
+}
+
 interface GameCanvasProps {
     level: Level;
-    onLevelComplete: () => void;
+    onLevelComplete: (stats: LevelStats) => void;
     onGameOver: () => void; // Not strictly used if infinite attempts, but good to have
 }
 
@@ -16,7 +21,10 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ level, onLevelComplete }) => {
     const previousTimeRef = useRef<number>(0);
     const containerRef = useRef<HTMLDivElement>(null);
     const [canvasSize, setCanvasSize] = React.useState({ width: 800, height: 600 });
-    const missFlashRef = useRef<{ clockId: number; until: number } | null>(null);
+
+    // Stats tracking
+    const startTimeRef = useRef<number>(Date.now());
+    const clickCountRef = useRef<number>(0);
 
     // Initialize clocks and set canvas size
     useEffect(() => {
@@ -106,7 +114,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ level, onLevelComplete }) => {
 
         clocksRef.current.forEach(clock => {
             const isStopped = clock.stoppedUntil > now;
-            const hasMissFlash = missFlashRef.current?.clockId === clock.id && missFlashRef.current.until > now;
 
             // Draw Safe Zone (Tolerance) as a filled wedge
             // 0 degrees is UP (12 o'clock). Canvas 0 is RIGHT.
@@ -135,16 +142,28 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ level, onLevelComplete }) => {
             // Draw Clock Face
             ctx.beginPath();
             ctx.arc(clock.x, clock.y, clock.radius, 0, 2 * Math.PI);
-            // Red if miss flash, green if stopped successfully, white if running
-            let clockColor = '#ffffff';
-            if (hasMissFlash) {
-                clockColor = '#ef4444'; // Red for miss
-            } else if (isStopped) {
-                clockColor = '#4ade80'; // Green for successful stop
-            }
-            ctx.strokeStyle = clockColor;
+            // Green if stopped, white if running
+            // User requested blue for freeze ring, let's use blue for stopped state too
+            ctx.strokeStyle = isStopped ? '#3b82f6' : '#ffffff'; // Blue if stopped
             ctx.lineWidth = 4;
             ctx.stroke();
+
+            // Draw Radial Freeze Timer (only if successfully stopped)
+            if (clock.successfullyStopped && isStopped) {
+                const remainingTime = clock.stoppedUntil - now;
+                // Calculate fraction relative to stopDurationMs
+                // Clamp to 1.0 so it doesn't look weird if time is stacked
+                const fraction = Math.min(1.0, Math.max(0, remainingTime / level.stopDurationMs));
+
+                if (fraction > 0) {
+                    ctx.beginPath();
+                    // Start from top (-PI/2) and go clockwise
+                    ctx.arc(clock.x, clock.y, clock.radius + 8, -Math.PI / 2, -Math.PI / 2 + (fraction * 2 * Math.PI));
+                    ctx.strokeStyle = '#3b82f6'; // Blue freeze ring
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                }
+            }
 
             // Draw 12 o'clock marker
             ctx.beginPath();
@@ -166,7 +185,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ level, onLevelComplete }) => {
                 clock.x + Math.cos(angleRad) * (clock.radius - 10),
                 clock.y + Math.sin(angleRad) * (clock.radius - 10)
             );
-            ctx.strokeStyle = clockColor;
+            ctx.strokeStyle = isStopped ? '#3b82f6' : '#ffffff'; // Blue if stopped
             ctx.lineWidth = 3;
             ctx.stroke();
 
@@ -187,8 +206,10 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ level, onLevelComplete }) => {
     useEffect(() => {
         const interval = setInterval(() => {
             const now = Date.now();
-            if (clocksRef.current.length > 0 && clocksRef.current.every(c => c.stoppedUntil > now)) {
-                onLevelComplete();
+            // Check if all clocks are successfully stopped (not just auto-paused)
+            if (clocksRef.current.length > 0 && clocksRef.current.every(c => c.successfullyStopped && c.stoppedUntil > now)) {
+                const timeSeconds = (now - startTimeRef.current) / 1000;
+                onLevelComplete({ timeSeconds, clicks: clickCountRef.current });
             }
         }, 500);
         return () => clearInterval(interval);
@@ -201,6 +222,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ level, onLevelComplete }) => {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
+        clickCountRef.current += 1;
         const now = Date.now();
 
         // Check input lock
@@ -218,8 +240,19 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ level, onLevelComplete }) => {
         if (hitClockId !== null) {
             const clickedClock = clocksRef.current.find(c => c.id === hitClockId);
 
-            // If clock is already stopped, ignore
-            if (clickedClock && clickedClock.stoppedUntil > now) {
+            // If clock is already stopped, refreeze it (reset timer)
+            if (clickedClock && clickedClock.stoppedUntil > now && clickedClock.successfullyStopped) {
+                clocksRef.current = clocksRef.current.map(c => {
+                    if (c.id === hitClockId) {
+                        return { ...c, stoppedUntil: now + level.stopDurationMs };
+                    }
+                    return c;
+                });
+                return;
+            }
+
+            // If clock is auto-paused (miss penalty), ignore click
+            if (clickedClock && clickedClock.stoppedUntil > now && !clickedClock.successfullyStopped) {
                 return;
             }
 
@@ -227,24 +260,21 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ level, onLevelComplete }) => {
                 // Successful stop at right time
                 clocksRef.current = clocksRef.current.map(c => {
                     if (c.id === hitClockId) {
-                        // Stop the clicked clock
-                        return { ...c, stoppedUntil: now + level.stopDurationMs };
-                    } else if (c.stoppedUntil > now) {
-                        // Add duration to already-stopped clocks (cumulative time)
-                        return { ...c, stoppedUntil: c.stoppedUntil + level.stopDurationMs };
-                    } else {
-                        // Speed up others that are running
+                        // Stop the clicked clock and mark as successfully stopped
+                        return { ...c, stoppedUntil: now + level.stopDurationMs, successfullyStopped: true };
+                    } else if (c.stoppedUntil <= now) {
+                        // Speed up others that are running (only if they are not stopped)
                         return { ...c, speed: c.speed * (1 + level.speedIncrementPercent) };
                     }
+                    return c;
                 });
                 missCountRef.current = 0;
             } else {
-                // Wrong time - auto-pause the clock briefly and show red feedback
+                // Wrong time - auto-pause the clock briefly (NOT a successful stop)
                 const autoPauseDuration = level.missAutoPauseDurationMs || 120;
-                missFlashRef.current = { clockId: hitClockId, until: now + 300 }; // Red flash for 300ms
                 clocksRef.current = clocksRef.current.map(c => {
                     if (c.id === hitClockId) {
-                        return { ...c, stoppedUntil: now + autoPauseDuration };
+                        return { ...c, stoppedUntil: now + autoPauseDuration, successfullyStopped: false };
                     }
                     return c;
                 });

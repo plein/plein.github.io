@@ -40,6 +40,7 @@ export const createClocks = (level: Level, width: number, height: number): Clock
             baseSpeed: speed,
             speed: speed,
             stoppedUntil: 0,
+            successfullyStopped: false,
         });
     }
     return clocks;
