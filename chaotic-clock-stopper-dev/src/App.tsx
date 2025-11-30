@@ -123,7 +123,7 @@ function GameContent() {
   return (
     <div className="min-h-screen bg-slate-900 text-white flex flex-col font-sans">
       {gameState === 'MENU' && (
-        <div className="flex-1 flex flex-col items-center justify-center p-4">
+        <div className="flex-1 flex flex-col items-center justify-start pt-8 p-4">
           <img
             src={`${import.meta.env.BASE_URL}logo.png`}
             alt="Chaotic Clock Stopper"
