@@ -182,7 +182,7 @@ function GameContent() {
       )}
 
       {gameState === 'PLAYING' && (
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col overflow-hidden">
           <div className="py-4 px-4 relative">
             <button
               onClick={handleBackToMenu}

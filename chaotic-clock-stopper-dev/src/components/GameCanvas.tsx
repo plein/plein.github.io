@@ -35,19 +35,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ level, onLevelComplete }) => {
         }
     }, [level]);
 
-    // Handle resize
-    useEffect(() => {
-        const handleResize = () => {
-            if (containerRef.current) {
-                const { clientWidth, clientHeight } = containerRef.current;
-                setCanvasSize({ width: clientWidth, height: clientHeight });
-                clocksRef.current = createClocks(level, clientWidth, clientHeight);
-            }
-        };
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, [level]);
-
     const previousStoppedCountRef = useRef<number>(0);
 
     const animate = (time: number) => {
