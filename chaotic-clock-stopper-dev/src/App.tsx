@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { StatsigProvider, useClientAsyncInit, useStatsigClient } from '@statsig/react-bindings'
 import GameCanvas from './components/GameCanvas'
 import { LEVELS } from './game/levels'
 import './App.css'
+
+const STATSIG_CLIENT_KEY = 'client-PAiDXAoAsC4GyQKPhcunwlpT2fssF9CHaeV1vkcbuSX';
 
 interface LevelStats {
   timeSeconds: number;
@@ -13,7 +16,8 @@ interface HighScore {
   date: string;
 }
 
-function App() {
+function GameContent() {
+  const { client } = useStatsigClient();
   const [levelIndex, setLevelIndex] = useState(0);
   const [gameState, setGameState] = useState<'MENU' | 'PLAYING' | 'LEVEL_COMPLETE' | 'WON' | 'SURVIVAL_OVER'>('MENU');
   const [gameMode, setGameMode] = useState<'NORMAL' | 'SURVIVAL'>('NORMAL');
@@ -21,6 +25,7 @@ function App() {
 
   // Survival Mode State
   const [survivalTimeLeft, setSurvivalTimeLeft] = useState(300); // 5 minutes in seconds
+  const totalSurvivalClicksRef = useRef(0);
   const [highScores, setHighScores] = useState<HighScore[]>(() => {
     const saved = localStorage.getItem('ccs_highscores');
     return saved ? JSON.parse(saved) : [];
@@ -35,6 +40,10 @@ function App() {
           if (prev <= 1) {
             setGameState('SURVIVAL_OVER');
             saveHighScore(levelIndex + 1);
+            client.logEvent('survival_mode_end', undefined, {
+              endLevel: String(levelIndex + 1),
+              totalClicks: String(totalSurvivalClicksRef.current)
+            });
             return 0;
           }
           return prev - 1;
@@ -42,7 +51,7 @@ function App() {
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [gameState, gameMode, levelIndex]);
+  }, [gameState, gameMode, levelIndex, client]);
 
   const saveHighScore = (level: number) => {
     const newScore: HighScore = { level, date: new Date().toLocaleDateString() };
@@ -58,13 +67,24 @@ function App() {
     setLevelIndex(0);
     if (mode === 'SURVIVAL') {
       setSurvivalTimeLeft(300);
+      totalSurvivalClicksRef.current = 0;
     }
     setGameState('PLAYING');
+    client.logEvent('game_start', undefined, { gameMode: mode });
   };
 
   const handleLevelComplete = (stats: LevelStats) => {
     setLevelStats(stats);
+
+    client.logEvent('level_completed', undefined, {
+      level: String(levelIndex + 1),
+      timeSeconds: String(stats.timeSeconds),
+      clicks: String(stats.clicks),
+      gameMode: gameMode
+    });
+
     if (gameMode === 'SURVIVAL') {
+      totalSurvivalClicksRef.current += stats.clicks;
       // In survival, just go to next level immediately or show brief flash?
       // User said "Timer must be paused during level transition and show in the level completion page"
       // So we show the completion page.
@@ -74,6 +94,10 @@ function App() {
         // Completed all levels in survival!
         setGameState('WON');
         saveHighScore(LEVELS.length);
+        client.logEvent('survival_mode_end', undefined, {
+          endLevel: String(LEVELS.length),
+          totalClicks: String(totalSurvivalClicksRef.current)
+        });
       }
     } else {
       // Normal mode
@@ -260,6 +284,19 @@ function App() {
       )}
     </div>
   )
+}
+
+function App() {
+  const { client } = useClientAsyncInit(
+    STATSIG_CLIENT_KEY,
+    { userID: '' }
+  );
+
+  return (
+    <StatsigProvider client={client} loadingComponent={<div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">Loading...</div>}>
+      <GameContent />
+    </StatsigProvider>
+  );
 }
 
 export default App
