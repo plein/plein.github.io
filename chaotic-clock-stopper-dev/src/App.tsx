@@ -137,178 +137,177 @@ function GameContent() {
 
   return (
     <div className="h-[100dvh] w-screen bg-slate-900 text-white flex flex-col font-sans overflow-hidden">
-      {gameState === 'MENU' && (
-        <div className="flex-1 flex flex-col items-center justify-start pt-8 p-4">
-          <img
-            src={`${import.meta.env.BASE_URL}logo.png`}
-            alt="Chaotic Clock Stopper"
-            className="w-full max-w-xs max-h-48 mb-4 rounded-2xl object-contain"
-          />
-          <div className="text-center space-y-6 p-8 bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 max-w-md w-full">
-            <p className="text-lg text-slate-300">
-              Stop all clocks at exactly 12 o'clock. <br />
-              When you stop one, the others get faster! <br /><br />
-              Click on the stopped clock to refreeze it.
-            </p>
-            <div className="flex flex-row gap-4">
-              <button
-                onClick={() => startGame('NORMAL')}
-                className="flex-1 px-10 py-6 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-full text-2xl transition-all transform hover:scale-105 shadow-lg shadow-blue-500/30"
-              >
-                Normal Mode
-              </button>
-              <button
-                onClick={() => startGame('SURVIVAL')}
-                className="flex-1 px-10 py-6 bg-red-600 hover:bg-red-500 text-white font-bold rounded-full text-2xl transition-all transform hover:scale-105 shadow-lg shadow-red-500/30"
-              >
-                Survival Mode
-              </button>
-            </div>
-            {highScores.length > 0 && (
-              <div className="mt-8 pt-6 border-t border-slate-700">
-                <h3 className="text-xl font-bold text-slate-400 mb-4">Survival High Scores</h3>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {highScores.map((score, i) => (
-                    <div key={i} className="flex justify-between text-slate-300 text-sm">
-                      <span>#{i + 1} {score.date}</span>
-                      <span className="font-bold text-white">Level {score.level}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {gameState === 'PLAYING' && (
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="py-4 px-4 relative">
-            <button
-              onClick={handleBackToMenu}
-              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg transition-all text-sm"
-            >
-              ← Menu
-            </button>
-            <div className="text-center mt-2">
-              <h2 className="text-2xl md:text-3xl font-bold text-slate-300">
-                Level {levelIndex + 1} / {LEVELS.length}
-              </h2>
-              {gameMode === 'SURVIVAL' && (
-                <div className={`text-xl font-mono mt-1 ${survivalTimeLeft < 60 ? 'text-red-400 animate-pulse' : 'text-blue-400'}`}>
-                  Time Left: {formatTime(survivalTimeLeft)}
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="flex-1 flex">
-            <GameCanvas
-              key={levelIndex} // Re-mount on level change
-              level={LEVELS[levelIndex]}
-              onLevelComplete={handleLevelComplete}
-              onGameOver={() => { }}
+      <div className="h-full w-full mx-auto flex flex-col">
+        {gameState === 'MENU' && (
+          <div className="flex-1 flex flex-col items-center justify-center p-4 overflow-y-auto w-full">
+            <img
+              src={`${import.meta.env.BASE_URL}logo.png`}
+              alt="Chaotic Clock Stopper"
+              className="w-auto max-w-[280px] md:max-w-full max-h-48 md:max-h-80 mb-8 rounded-2xl object-contain"
             />
-          </div>
-        </div>
-      )}
 
-      {gameState === 'LEVEL_COMPLETE' && (
-        <div className="flex-1 flex flex-col items-center justify-center p-4">
-          <div className="text-center space-y-6 p-12 bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 max-w-md">
-            <h2 className="text-4xl font-bold text-green-400">Level {levelIndex + 1} Completed!</h2>
-            <div className="space-y-3 text-slate-300">
-              <div className="text-2xl">
-                <span className="text-slate-400">Time:</span> <span className="font-bold text-white">{levelStats.timeSeconds.toFixed(1)}s</span>
-              </div>
-              <div className="text-2xl">
-                <span className="text-slate-400">Clicks:</span> <span className="font-bold text-white">{levelStats.clicks}</span>
-              </div>
-              {gameMode === 'SURVIVAL' && (
-                <div className="text-2xl pt-4 border-t border-slate-700 mt-4">
-                  <span className="text-slate-400">Survival Timer:</span> <br />
-                  <span className={`font-mono font-bold ${survivalTimeLeft < 60 ? 'text-red-400' : 'text-blue-400'}`}>
-                    {formatTime(survivalTimeLeft)}
-                  </span>
+            <div className="w-full flex justify-center">
+              <div className="text-center space-y-6 p-8 bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 w-full sm:w-2/3 lg:w-1/3">
+                <p className="text-lg text-slate-300">
+                  Stop all clocks at exactly 12 o'clock. <br />
+                  When you stop one, the others get faster! <br /><br />
+                  Click on the stopped clock to refreeze it.
+                </p>
+                <div className="flex flex-col gap-4">
+                  <button
+                    onClick={() => startGame('NORMAL')}
+                    className="w-full px-10 py-6 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-full text-2xl transition-all transform hover:scale-105 shadow-lg shadow-blue-500/30"
+                  >
+                    Normal Mode
+                  </button>
+                  <button
+                    onClick={() => startGame('SURVIVAL')}
+                    className="w-full px-10 py-6 bg-red-600 hover:bg-red-500 text-white font-bold rounded-full text-2xl transition-all transform hover:scale-105 shadow-lg shadow-red-500/30"
+                  >
+                    Survival Mode
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
-            <button
-              onClick={handleContinue}
-              className="px-12 py-5 bg-green-600 hover:bg-green-500 text-white font-bold rounded-full text-2xl transition-all transform hover:scale-105 shadow-lg shadow-green-500/30"
-            >
-              Continue
-            </button>
           </div>
-        </div>
-      )}
+        )}
 
-      {gameState === 'SURVIVAL_OVER' && (
-        <div className="flex-1 flex flex-col items-center justify-center p-4">
-          <h1 className="text-4xl md:text-5xl font-bold mb-8 tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-500">
-            Time's Up!
-          </h1>
-          <div className="text-center space-y-6 p-8 bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 max-w-md w-full">
-            <div className="text-3xl font-bold text-white mb-4">
-              You reached <span className="text-blue-400">Level {levelIndex + 1}</span>
+        {
+          gameState === 'PLAYING' && (
+            <div className="flex-1 flex flex-col overflow-hidden">
+              <div className="py-4 px-4 relative">
+                <button
+                  onClick={handleBackToMenu}
+                  className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold rounded-lg transition-all text-sm"
+                >
+                  ← Menu
+                </button>
+                <div className="text-center mt-2">
+                  <h2 className="text-2xl md:text-3xl font-bold text-slate-300">
+                    Level {levelIndex + 1} / {LEVELS.length}
+                  </h2>
+                  {gameMode === 'SURVIVAL' && (
+                    <div className={`text-xl font-mono mt-1 ${survivalTimeLeft < 60 ? 'text-red-400 animate-pulse' : 'text-blue-400'}`}>
+                      Time Left: {formatTime(survivalTimeLeft)}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex-1 flex">
+                <GameCanvas
+                  key={levelIndex} // Re-mount on level change
+                  level={LEVELS[levelIndex]}
+                  onLevelComplete={handleLevelComplete}
+                  onGameOver={() => { }}
+                />
+              </div>
             </div>
+          )
+        }
 
-            <div className="border-t border-slate-700 pt-6">
-              <h3 className="text-xl font-bold text-slate-400 mb-4">Top 10 Scores</h3>
-              <div className="space-y-2 max-h-60 overflow-y-auto">
-                {highScores.map((score, i) => (
-                  <div key={i} className={`flex justify-between p-2 rounded ${score.level === levelIndex + 1 && i === highScores.findIndex(s => s.level === levelIndex + 1 && s.date === new Date().toLocaleDateString()) ? 'bg-slate-700 border border-slate-600' : 'text-slate-300'}`}>
-                    <span>#{i + 1} {score.date}</span>
-                    <span className="font-bold text-white">Level {score.level}</span>
+        {
+          gameState === 'LEVEL_COMPLETE' && (
+            <div className="flex-1 flex flex-col items-center justify-center p-4">
+              <div className="text-center space-y-6 p-12 bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 max-w-md">
+                <h2 className="text-4xl font-bold text-green-400">Level {levelIndex + 1} Completed!</h2>
+                <div className="space-y-3 text-slate-300">
+                  <div className="text-2xl">
+                    <span className="text-slate-400">Time:</span> <span className="font-bold text-white">{levelStats.timeSeconds.toFixed(1)}s</span>
                   </div>
-                ))}
+                  <div className="text-2xl">
+                    <span className="text-slate-400">Clicks:</span> <span className="font-bold text-white">{levelStats.clicks}</span>
+                  </div>
+                  {gameMode === 'SURVIVAL' && (
+                    <div className="text-2xl pt-4 border-t border-slate-700 mt-4">
+                      <span className="text-slate-400">Survival Timer:</span> <br />
+                      <span className={`font-mono font-bold ${survivalTimeLeft < 60 ? 'text-red-400' : 'text-blue-400'}`}>
+                        {formatTime(survivalTimeLeft)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={handleContinue}
+                  className="px-12 py-5 bg-green-600 hover:bg-green-500 text-white font-bold rounded-full text-2xl transition-all transform hover:scale-105 shadow-lg shadow-green-500/30"
+                >
+                  Continue
+                </button>
               </div>
             </div>
+          )
+        }
 
-            <button
-              onClick={() => {
-                setLevelIndex(0);
-                setGameState('MENU');
-              }}
-              className="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-full transition-all w-full"
-            >
-              Back to Menu
-            </button>
-          </div>
-        </div>
-      )}
+        {
+          gameState === 'SURVIVAL_OVER' && (
+            <div className="flex-1 flex flex-col items-center justify-center p-4">
+              <h1 className="text-4xl md:text-5xl font-bold mb-8 tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-500">
+                Time's Up!
+              </h1>
+              <div className="text-center space-y-6 p-8 bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 max-w-md w-full">
+                <div className="text-3xl font-bold text-white mb-4">
+                  You reached <span className="text-blue-400">Level {levelIndex + 1}</span>
+                </div>
 
-      {gameState === 'WON' && (
-        <div className="flex-1 flex flex-col items-center justify-center p-4">
-          <h1 className="text-4xl md:text-5xl font-bold mb-8 tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-            Chaotic Clock Stopper
-          </h1>
-          <div className="text-center space-y-6 p-8 bg-slate-800 rounded-2xl shadow-2xl border border-slate-700">
-            <h2 className="text-3xl font-bold text-green-400">You Won!</h2>
-            <p className="text-slate-300">You have mastered the chaos of time.</p>
-            <div className="text-xl text-slate-300">
-              <div>Final Level Time: <span className="font-bold text-white">{levelStats.timeSeconds.toFixed(1)}s</span></div>
-              <div>Final Level Clicks: <span className="font-bold text-white">{levelStats.clicks}</span></div>
-            </div>
-            {gameMode === 'SURVIVAL' && (
-              <div className="mt-4 p-4 bg-slate-700 rounded-lg">
-                <div className="text-yellow-400 font-bold text-xl">SURVIVAL COMPLETED!</div>
-                <div className="text-slate-300">Time Remaining: {formatTime(survivalTimeLeft)}</div>
+                <div className="border-t border-slate-700 pt-6">
+                  <h3 className="text-xl font-bold text-slate-400 mb-4">Top 10 Scores</h3>
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {highScores.map((score, i) => (
+                      <div key={i} className={`flex justify-between p-2 rounded ${score.level === levelIndex + 1 && i === highScores.findIndex(s => s.level === levelIndex + 1 && s.date === new Date().toLocaleDateString()) ? 'bg-slate-700 border border-slate-600' : 'text-slate-300'}`}>
+                        <span>#{i + 1} {score.date}</span>
+                        <span className="font-bold text-white">Level {score.level}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setLevelIndex(0);
+                    setGameState('MENU');
+                  }}
+                  className="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-full transition-all w-full"
+                >
+                  Back to Menu
+                </button>
               </div>
-            )}
-            <button
-              onClick={() => {
-                setLevelIndex(0);
-                setGameState('MENU');
-              }}
-              className="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-full transition-all"
-            >
-              Play Again
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  )
+            </div>
+          )
+        }
+
+        {
+          gameState === 'WON' && (
+            <div className="flex-1 flex flex-col items-center justify-center p-4">
+              <h1 className="text-4xl md:text-5xl font-bold mb-8 tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+                Chaotic Clock Stopper
+              </h1>
+              <div className="text-center space-y-6 p-8 bg-slate-800 rounded-2xl shadow-2xl border border-slate-700">
+                <h2 className="text-3xl font-bold text-green-400">You Won!</h2>
+                <p className="text-slate-300">You have mastered the chaos of time.</p>
+                <div className="text-xl text-slate-300">
+                  <div>Final Level Time: <span className="font-bold text-white">{levelStats.timeSeconds.toFixed(1)}s</span></div>
+                  <div>Final Level Clicks: <span className="font-bold text-white">{levelStats.clicks}</span></div>
+                </div>
+                {gameMode === 'SURVIVAL' && (
+                  <div className="mt-4 p-4 bg-slate-700 rounded-lg">
+                    <div className="text-yellow-400 font-bold text-xl">SURVIVAL COMPLETED!</div>
+                    <div className="text-slate-300">Time Remaining: {formatTime(survivalTimeLeft)}</div>
+                  </div>
+                )}
+                <button
+                  onClick={() => {
+                    setLevelIndex(0);
+                    setGameState('MENU');
+                  }}
+                  className="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-full transition-all"
+                >
+                </button>
+              </div>
+            </div>
+          )
+        }
+      </div >
+    </div >
+  );
 }
 
 function App() {
