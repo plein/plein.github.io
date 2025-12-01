@@ -136,13 +136,13 @@ function GameContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white flex flex-col font-sans">
+    <div className="h-[100dvh] w-screen bg-slate-900 text-white flex flex-col font-sans overflow-hidden">
       {gameState === 'MENU' && (
         <div className="flex-1 flex flex-col items-center justify-start pt-8 p-4">
           <img
             src={`${import.meta.env.BASE_URL}logo.png`}
             alt="Chaotic Clock Stopper"
-            className="w-full max-w-md mb-8 rounded-2xl"
+            className="w-full max-w-xs max-h-48 mb-4 rounded-2xl object-contain"
           />
           <div className="text-center space-y-6 p-8 bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 max-w-md w-full">
             <p className="text-lg text-slate-300">
@@ -201,7 +201,7 @@ function GameContent() {
               )}
             </div>
           </div>
-          <div className="flex-1">
+          <div className="flex-1 flex">
             <GameCanvas
               key={levelIndex} // Re-mount on level change
               level={LEVELS[levelIndex]}

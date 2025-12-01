@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import type { Clock, Level } from '../game/types';
-import { createClocks, updateClocks, checkHit } from '../game/engine';
+import { createClocks, updateClocks, checkHit, repositionClocks } from '../game/engine';
 
 interface LevelStats {
     timeSeconds: number;
@@ -31,9 +31,77 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ level, onLevelComplete }) => {
         if (containerRef.current) {
             const { clientWidth, clientHeight } = containerRef.current;
             setCanvasSize({ width: clientWidth, height: clientHeight });
-            clocksRef.current = createClocks(level, clientWidth, clientHeight);
+            // Use window dimensions for reliable orientation detection
+            const isPortrait = window.innerHeight > window.innerWidth;
+            clocksRef.current = createClocks(level, clientWidth, clientHeight, isPortrait);
         }
     }, [level]);
+
+    // Set canvas size once on mount - no continuous resizing
+    useEffect(() => {
+        const updateSize = () => {
+            if (containerRef.current) {
+                const { clientWidth, clientHeight } = containerRef.current;
+                if (clientWidth > 0 && clientHeight > 0) {
+                    setCanvasSize({ width: clientWidth, height: clientHeight });
+
+                    const isPortrait = window.innerHeight > window.innerWidth;
+                    if (clocksRef.current.length > 0) {
+                        clocksRef.current = repositionClocks(clocksRef.current, clientWidth, clientHeight, isPortrait);
+                    }
+                }
+            }
+        };
+
+        // Initial size
+        updateSize();
+
+        // Handle window resize with debounce
+        let resizeTimeout: number;
+        const handleResize = () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = window.setTimeout(updateSize, 100);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            clearTimeout(resizeTimeout);
+        };
+    }, []);
+
+    // Measure and update canvas size using useLayoutEffect for reliable timing
+    React.useLayoutEffect(() => {
+        const updateSize = () => {
+            if (containerRef.current) {
+                const { clientWidth, clientHeight } = containerRef.current;
+                console.log('Canvas container size:', clientWidth, 'x', clientHeight);
+                if (clientWidth > 0 && clientHeight > 0) {
+                    setCanvasSize({ width: clientWidth, height: clientHeight });
+                    const isPortrait = window.innerHeight > window.innerWidth;
+                    if (clocksRef.current.length > 0) {
+                        clocksRef.current = repositionClocks(clocksRef.current, clientWidth, clientHeight, isPortrait);
+                    }
+                }
+            }
+        };
+
+        // Initial size after layout
+        updateSize();
+
+        // Handle window resize with debounce
+        let resizeTimeout: number;
+        const handleResize = () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = window.setTimeout(updateSize, 150);
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            clearTimeout(resizeTimeout);
+        };
+    }, []);
 
     const previousStoppedCountRef = useRef<number>(0);
 
@@ -100,15 +168,15 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ level, onLevelComplete }) => {
         }
 
         clocksRef.current.forEach(clock => {
-            const isStopped = clock.stoppedUntil > now;
+            if (clock.radius <= 5) return; // Skip if too small to draw safely
 
-            // Draw Safe Zone (Tolerance) as a filled wedge
-            // 0 degrees is UP (12 o'clock). Canvas 0 is RIGHT.
-            // So UP is -90 degrees (or 270).
-            // We want to draw a wedge around UP.
-            // Start angle: -90 - tolerance
-            // End angle: -90 + tolerance
-            const toleranceRad = level.toleranceDegrees * (Math.PI / 180);
+            const isStopped = clock.stoppedUntil > now;
+            const color = isStopped ? '#3b82f6' : '#ffffff';
+
+            // Draw Safe Zone (wedge)
+            // Tolerance is in degrees. Convert to radians.
+            const toleranceRad = (level.toleranceDegrees * Math.PI) / 180;
+            // 0 is UP (-PI/2).
             const startAngle = -Math.PI / 2 - toleranceRad;
             const endAngle = -Math.PI / 2 + toleranceRad;
 
@@ -131,7 +199,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ level, onLevelComplete }) => {
             ctx.arc(clock.x, clock.y, clock.radius, 0, 2 * Math.PI);
             // Green if stopped, white if running
             // User requested blue for freeze ring, let's use blue for stopped state too
-            ctx.strokeStyle = isStopped ? '#3b82f6' : '#ffffff'; // Blue if stopped
+            ctx.strokeStyle = color; // Blue if stopped
             ctx.lineWidth = 4;
             ctx.stroke();
 
@@ -161,18 +229,18 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ level, onLevelComplete }) => {
 
             // Draw Hand
             // 0 degrees is UP (12 o'clock). 
-            // Canvas arc 0 is RIGHT (3 o'clock).
-            // So we need to subtract 90 degrees (PI/2) when drawing.
-            const angleRad = (clock.angle - 90) * (Math.PI / 180);
+            // Canvas arc 0 is RIGHT. So we need to subtract 90 deg (PI/2)
+            const angleRad = (clock.angle * Math.PI) / 180 - Math.PI / 2;
+            const handLength = clock.radius - 10;
+            const handX = clock.x + Math.cos(angleRad) * handLength;
+            const handY = clock.y + Math.sin(angleRad) * handLength;
 
             ctx.beginPath();
             ctx.moveTo(clock.x, clock.y);
-            ctx.lineTo(
-                clock.x + Math.cos(angleRad) * (clock.radius - 10),
-                clock.y + Math.sin(angleRad) * (clock.radius - 10)
-            );
-            ctx.strokeStyle = isStopped ? '#3b82f6' : '#ffffff'; // Blue if stopped
-            ctx.lineWidth = 3;
+            ctx.lineTo(handX, handY);
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
             ctx.stroke();
 
             // Center dot
@@ -283,7 +351,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ level, onLevelComplete }) => {
     };
 
     return (
-        <div ref={containerRef} className="w-full h-full">
+        <div ref={containerRef} className="flex-1 w-full">
             <canvas
                 ref={canvasRef}
                 width={canvasSize.width}

@@ -1,10 +1,10 @@
 import type { Clock, Level } from './types';
 
-export const createClocks = (level: Level, width: number, height: number): Clock[] => {
+export const createClocks = (level: Level, width: number, height: number, isPortraitOverride?: boolean): Clock[] => {
     const clocks: Clock[] = [];
     const numClocks = level.clockConfigs ? level.clockConfigs.length : (level.numClocks || 3);
 
-    const isPortrait = height > width;
+    const isPortrait = isPortraitOverride !== undefined ? isPortraitOverride : height > width;
 
     let cols: number;
     if (isPortrait) {
@@ -17,17 +17,30 @@ export const createClocks = (level: Level, width: number, height: number): Clock
 
     const rows = Math.ceil(numClocks / cols);
 
-    const cellWidth = width / cols;
-    const cellHeight = height / rows;
-    // Use slightly larger radius multiplier (0.45) to fill more space
-    const radius = Math.min(cellWidth, cellHeight) * 0.45;
+    // Calculate optimal square cell size
+    const maxCellWidth = width / cols;
+    const maxCellHeight = height / rows;
+    const cellSize = Math.min(maxCellWidth, maxCellHeight);
+
+    // Calculate grid dimensions
+    const gridWidth = cols * cellSize;
+    const gridHeight = rows * cellSize;
+
+    // Calculate offsets to center the grid
+    const startX = (width - gridWidth) / 2;
+    const startY = (height - gridHeight) / 2;
+
+    // Radius relative to cell size (0.4 gives some padding)
+    // Ensure radius is at least 10px to avoid drawing errors
+    const radius = Math.max(10, cellSize * 0.4);
 
     for (let i = 0; i < numClocks; i++) {
         const col = i % cols;
         const row = Math.floor(i / cols);
 
-        const centerX = col * cellWidth + cellWidth / 2;
-        const centerY = row * cellHeight + cellHeight / 2;
+        // Center in the square cell, plus the grid offset
+        const centerX = startX + col * cellSize + cellSize / 2;
+        const centerY = startY + row * cellSize + cellSize / 2;
 
         let speed: number;
 
@@ -55,6 +68,47 @@ export const createClocks = (level: Level, width: number, height: number): Clock
         });
     }
     return clocks;
+};
+
+export const repositionClocks = (clocks: Clock[], width: number, height: number, isPortraitOverride?: boolean): Clock[] => {
+    const numClocks = clocks.length;
+    const isPortrait = isPortraitOverride !== undefined ? isPortraitOverride : height > width;
+
+    let cols: number;
+    if (isPortrait) {
+        cols = Math.min(numClocks, 2);
+    } else {
+        cols = Math.ceil(Math.sqrt(numClocks));
+    }
+
+    const rows = Math.ceil(numClocks / cols);
+
+    const maxCellWidth = width / cols;
+    const maxCellHeight = height / rows;
+    const cellSize = Math.min(maxCellWidth, maxCellHeight);
+
+    const gridWidth = cols * cellSize;
+    const gridHeight = rows * cellSize;
+
+    const startX = (width - gridWidth) / 2;
+    const startY = (height - gridHeight) / 2;
+
+    const radius = Math.max(10, cellSize * 0.4);
+
+    return clocks.map((clock, i) => {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+
+        const centerX = startX + col * cellSize + cellSize / 2;
+        const centerY = startY + row * cellSize + cellSize / 2;
+
+        return {
+            ...clock,
+            x: centerX,
+            y: centerY,
+            radius
+        };
+    });
 };
 
 export const updateClocks = (clocks: Clock[], deltaSeconds: number, now: number): Clock[] => {
