@@ -2,16 +2,6 @@ import type { Level } from './types';
 
 export const LEVELS: Level[] = [
     {
-        // L12: 7 clocks, real chaos begins
-        baseSpeedRps: 0.8,
-        numClocks: 7,
-        stopDurationMs: 12000,
-        speedIncrementPercent: 0.16,
-        toleranceDegrees: 10,
-        missPenalty: { maxMisses: 7, durationMs: 1500 },
-        missAutoPauseDurationMs: 85,
-    },
-    {
         // L1: Tutorial - 2 slow clocks, huge tolerance, very forgiving
         baseSpeedRps: 0.25,
         numClocks: 2,
